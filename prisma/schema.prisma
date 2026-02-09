@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum ROLE {
+  PROVIDER
+  CLIENT
+  ADMIN
+}
+
+enum BOOKINGSTATUS {
+  PENDING
+  ACCEPTED
+  CANCELLED
+}
+
+model User {
+  id                 String                  @id @default(auto()) @map("_id") @db.ObjectId
+  name               String
+  email              String                  @unique
+  username           String
+  password           String?
+  role               ROLE                    @default(CLIENT)
+  phoneNumber        String?                 @unique @map("phone_no")
+  country            String
+  bio                String?
+  timezone           String                  @default("UTC")
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+  availabilities     AvailabilityRule[]
+  exceptions         AvailabilityException[]
+  bookingsAsProvider Booking[]               @relation("ProviderBookings")
+  bookingsAsClient   Booking[]               @relation("ClientBookings")
+}
+
+model AvailabilityRule {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String @db.ObjectId
+  user      User   @relation(fields: [userId], references: [id])
+  dayOfWeek Int //0-6       
+  startTime String //"9:00"
+  endTime   String //"17:00"
+  slotSize  Int // minutes
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, dayOfWeek])
+}
+
+model AvailabilityException {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String    @db.ObjectId
+  user      User      @relation(references: [id], fields: [userId])
+  date      DateTime //YYYY-MM-DD (UTC)
+  startTime DateTime?
+  endTime   DateTime?
+  reason    String?
+
+  @@index([userId, date])
+}
+
+model TimeSlot {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  date      DateTime
+  startTime DateTime
+  endTime   DateTime
+  isBooked  Boolean  @default(false)
+
+  bookingId String?  @unique @db.ObjectId
+  booking   Booking? @relation(fields: [bookingId], references: [id])
+
+  @@index([userId, date])
+  @@index([userId, startTime, endTime])
+}
+
+model Booking {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  providerId String    @db.ObjectId
+  clientId   String    @db.ObjectId
+  timeSlotId String    @db.ObjectId
+  timeSlot   TimeSlot? @relation()
+  provider   User      @relation("ProviderBookings", fields: [providerId], references: [id])
+  client     User      @relation("ClientBookings", fields: [clientId], references: [id])
+
+  Status BOOKINGSTATUS
+  notes  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([providerId])
+  @@index([clientId])
+}
