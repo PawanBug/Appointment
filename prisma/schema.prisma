@@ -49,8 +49,8 @@ model AvailabilityRule {
   userId    String @db.ObjectId
   user      User   @relation(fields: [userId], references: [id])
   dayOfWeek Int //0-6       
-  startTime String //"9:00"
-  endTime   String //"17:00"
+  startTime Int //"9:00"
+  endTime   Int //"17:00"
   slotSize  Int // minutes
 
   createdAt DateTime @default(now())
@@ -63,23 +63,21 @@ model AvailabilityException {
   userId    String    @db.ObjectId
   user      User      @relation(references: [id], fields: [userId])
   date      DateTime //YYYY-MM-DD (UTC)
-  startTime DateTime?
-  endTime   DateTime?
+  startTime Int?
+  endTime   Int?
   reason    String?
 
   @@index([userId, date])
 }
 
 model TimeSlot {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String   @db.ObjectId
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String    @db.ObjectId
   date      DateTime
   startTime DateTime
   endTime   DateTime
-  isBooked  Boolean  @default(false)
-
-  bookingId String?  @unique @db.ObjectId
-  booking   Booking? @relation(fields: [bookingId], references: [id])
+  isBooked  Boolean   @default(false)
+  bookings  Booking[]
 
   @@index([userId, date])
   @@index([userId, startTime, endTime])
@@ -90,7 +88,7 @@ model Booking {
   providerId String    @db.ObjectId
   clientId   String    @db.ObjectId
   timeSlotId String    @db.ObjectId
-  timeSlot   TimeSlot? @relation()
+  timeSlot   TimeSlot? @relation(fields: [timeSlotId], references: [id])
   provider   User      @relation("ProviderBookings", fields: [providerId], references: [id])
   client     User      @relation("ClientBookings", fields: [clientId], references: [id])
 
