@@ -1,4 +1,4 @@
-import { createAvailabilityExceptionSchema } from "@/lib/validators/availability-exception";
+import { createTimeSlotSchema } from "@/lib/validators/timeslot";
 import { requireAdminProvider } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
@@ -7,34 +7,32 @@ import z from "zod";
 export async function GET(req: NextRequest) {
   try {
     const searchParams = req.nextUrl.searchParams;
-    const searchParamsObject = Object.fromEntries(searchParams);
+
+    const searchParamsObject = Object.fromEntries(searchParams.entries());
+
     const { success, data } = z
       .object({
-        userId: z.string().min(1, "Provide correct userId"),
+        userId: z.string(),
       })
       .safeParse(searchParamsObject);
 
     if (!success) {
       return NextResponse.json({
-        message: "Invalid user data",
+        message: "Invalid Request",
         status: 400,
         success: false,
       });
     }
     const { userId } = data;
-
-    const availabityExceptions = await prisma.availabilityException.findMany({
+    const timeSlots = await prisma.timeSlot.findMany({
       where: { userId },
-      orderBy: {
-        date: "desc",
-      },
     });
 
     return NextResponse.json({
-      message: "Availbility Exception fetched successfully.",
+      message: "TimeSlots fetched Successfully.",
       status: 201,
       success: true,
-      data: availabityExceptions,
+      data: timeSlots,
     });
   } catch (error) {
     console.log("error", error);
@@ -49,17 +47,18 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const { isAuthorized, user } = await requireAdminProvider();
+
     if (!isAuthorized || !user) {
       return NextResponse.json({
-        message: "Unauthorized",
+        message: "Unauthorized user",
         status: 401,
         success: false,
       });
     }
 
     const body = await req.json();
+    const { success, data } = createTimeSlotSchema.safeParse(body);
 
-    const { success, data } = createAvailabilityExceptionSchema.safeParse(body);
     if (!success) {
       return NextResponse.json({
         message: "Invalid request data",
@@ -68,25 +67,24 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const { startTime, date, endTime, reason, userId } = data;
-    const availabilityException = await prisma.availabilityException.create({
+    const timeslot = await prisma.timeSlot.create({
       data: {
-        date,
-        startTime,
-        endTime,
-        userId,
-        reason,
+        date: data.date,
+        endTime: data.endTime,
+        startTime: data.startTime,
+        isBooked: data.isBooked,
+        bookingId: data.bookingId,
+        userId: data.userId,
       },
     });
 
     return NextResponse.json({
-      message: "AvailabilityException created successfully.",
+      message: "Time slot created successfully.",
       status: 201,
       success: true,
-      data: availabilityException,
+      data: timeslot,
     });
-  } catch (error) {
-    console.log("error", error);
+  } catch {
     return NextResponse.json({
       message: "Internal Server Error",
       status: 500,

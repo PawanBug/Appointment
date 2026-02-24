@@ -67,8 +67,8 @@ async function main() {
     data: {
       userId: provider.id,
       dayOfWeek: 1,
-      startTime: "09:00",
-      endTime: "17:00",
+      startTime: 540,
+      endTime: 1020,
       slotSize: 30,
     },
   });
@@ -77,8 +77,8 @@ async function main() {
     data: {
       userId: provider.id,
       dayOfWeek: 2,
-      startTime: "10:00",
-      endTime: "16:00",
+      startTime: 600,
+      endTime: 960,
       slotSize: 30,
     },
   });
@@ -87,8 +87,8 @@ async function main() {
     data: {
       userId: provider.id,
       dayOfWeek: 3,
-      startTime: "08:00",
-      endTime: "14:00",
+      startTime: 480,
+      endTime: 840,
       slotSize: 20,
     },
   });
@@ -109,8 +109,8 @@ async function main() {
     data: {
       userId: provider.id,
       date: new Date("2026-03-05"),
-      startTime: new Date("2026-03-05T12:00:00Z"),
-      endTime: new Date("2026-03-05T15:00:00Z"),
+      startTime: 720,
+      endTime: 900,
       reason: "Personal Leave",
     },
   });
@@ -131,8 +131,8 @@ async function main() {
     data: {
       userId: provider.id,
       date: new Date("2026-03-03"),
-      startTime: new Date("2026-03-03T09:00:00Z"),
-      endTime: new Date("2026-03-03T09:30:00Z"),
+      startTime: 540,
+      endTime: 570,
       isBooked: true,
     },
   });
@@ -141,8 +141,8 @@ async function main() {
     data: {
       userId: provider.id,
       date: new Date("2026-03-03"),
-      startTime: new Date("2026-03-03T10:00:00Z"),
-      endTime: new Date("2026-03-03T10:30:00Z"),
+      startTime: 600,
+      endTime: 630,
       isBooked: true,
     },
   });
@@ -151,8 +151,8 @@ async function main() {
     data: {
       userId: provider.id,
       date: new Date("2026-03-04"),
-      startTime: new Date("2026-03-04T11:00:00Z"),
-      endTime: new Date("2026-03-04T11:30:00Z"),
+      startTime: 660,
+      endTime: 690,
       isBooked: true,
     },
   });

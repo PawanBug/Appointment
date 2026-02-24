@@ -1,4 +1,5 @@
 import z from "zod";
+import { userSchema, userTypeSchema } from "./user-validation";
 
 export const createAvailabilityExceptionSchema = z
   .object({
@@ -33,3 +34,21 @@ export const createAvailabilityExceptionSchema = z
       });
     }
   });
+
+export const availabilityExceptionSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  user: userTypeSchema,
+  date: z.date(),
+  startTime: z.number().int(),
+  endTime: z.number().int(),
+  reason: z.string().optional(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type AvailabilityExceptionCreate = z.infer<
+  typeof createAvailabilityExceptionSchema
+>;
+
+export type AvailabilityException = z.infer<typeof availabilityExceptionSchema>;

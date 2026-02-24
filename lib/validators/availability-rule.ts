@@ -1,4 +1,5 @@
 import z from "zod";
+import { userTypeSchema } from "./user-validation";
 
 export const createAvailabilityRuleSchema = z
   .object({
@@ -32,3 +33,22 @@ export const updateAvailabilityRuleSchema = z
     message: "Endtime must be greater than start-time.",
     path: ["endTime"],
   });
+
+export const availabiltyRuleSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  dayOfWeek: z.number().int().min(0).max(6),
+  startTime: z.number().int().min(0).max(1440),
+  endTime: z.number().int().min(0).max(1440),
+  slotSize: z.number().int(),
+  user: userTypeSchema,
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type AvailablityRuleCreate = z.infer<
+  typeof createAvailabilityRuleSchema
+>;
+export type AvailabilityRuleUpdate = z.infer<
+  typeof updateAvailabilityRuleSchema
+>;

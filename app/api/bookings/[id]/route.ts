@@ -1,7 +1,43 @@
-import { updateAvailabilityRuleSchema } from "@/lib/validators/availability-rule";
 import { requireAdminProvider } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { updatebookingSchema } from "@/lib/validators/booking";
+
 import { NextRequest, NextResponse } from "next/server";
+
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { id } = await params;
+
+    const booking = await prisma.booking.findUnique({
+      where: { id },
+    });
+
+    if (!booking) {
+      return NextResponse.json({
+        message: "Booking not found",
+        status: 404,
+        success: false,
+      });
+    }
+
+    return NextResponse.json({
+      message: "Booking fetched successfully.",
+      status: 200,
+      success: true,
+      data: booking,
+    });
+  } catch (error) {
+    console.log("error", error);
+    return NextResponse.json({
+      message: "Internal Server Error",
+      status: 500,
+      success: false,
+    });
+  }
+}
 
 export async function PUT(
   req: NextRequest,
@@ -16,11 +52,23 @@ export async function PUT(
         success: false,
       });
     }
-
     const { id } = await params;
-    const body = await req.json();
 
-    const { success, data } = updateAvailabilityRuleSchema.safeParse(body);
+    const booking = await prisma.booking.findUnique({
+      where: {
+        id,
+      },
+    });
+    if (!booking) {
+      return NextResponse.json({
+        message: "Booking not found",
+        status: 404,
+        success: false,
+      });
+    }
+    const body = req.json();
+    const { success, data } = updatebookingSchema.safeParse(body);
+
     if (!success) {
       return NextResponse.json({
         message: "Invalid Request",
@@ -28,70 +76,22 @@ export async function PUT(
         success: false,
       });
     }
-
-    const availabilityRule = await prisma.availabilityRule.findUnique({
-      where: { id },
-    });
-
-    if (!availabilityRule) {
-      return NextResponse.json({
-        message: "Availablity Rule with that Id doesnot exist.",
-        status: 404,
-        success: false,
-      });
-    }
-
-    const updatedAvailabilityRule = await prisma.availabilityRule.update({
+    const updatedBooking = await prisma.booking.update({
       where: { id },
       data: {
-        dayOfWeek: data.dayOfWeek,
-        endTime: data.endTime,
-        startTime: data.startTime,
-        slotSize: data.slotSize,
+        clientId: data.clientId,
+        providerId: data.providerId,
+        timeSlotId: data.timeSlotId,
+        Status: data.Status,
+        notes: data.notes,
       },
     });
 
     return NextResponse.json({
-      message: "Updated availability rule successfully.",
-      success: true,
-      status: 201,
-      data: updatedAvailabilityRule,
-    });
-  } catch (error) {
-    console.log("error", error);
-    return NextResponse.json({
-      message: "Internal Server Error",
-      status: 500,
-      success: false,
-    });
-  }
-}
-
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  try {
-    const { id } = await params;
-
-    const availabilityRule = await prisma.availabilityRule.findUnique({
-      where: { id },
-      include: { user: true },
-    });
-
-    if (!availabilityRule) {
-      return NextResponse.json({
-        message: "Availability Rule doesnot exist.",
-        status: 404,
-        success: false,
-      });
-    }
-
-    return NextResponse.json({
-      message: "Availability Rule fetched successfully.",
+      message: "Booking updated successfully",
       status: 201,
       success: true,
-      data: availabilityRule,
+      data: updatedBooking,
     });
   } catch (error) {
     console.log("error", error);
@@ -108,36 +108,35 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const { isAuthorized, user } = await requireAdminProvider();
+
     if (!isAuthorized || !user) {
       return NextResponse.json({
-        message: "User not authorized.",
+        message: "Unauthorized user",
         status: 401,
         success: false,
       });
     }
 
-    const { id } = await params;
-
-    const availabilityRule = await prisma.availabilityRule.findUnique({
+    const booking = await prisma.booking.findUnique({
       where: { id },
-      include: { user: true },
     });
 
-    if (!availabilityRule) {
+    if (!booking) {
       return NextResponse.json({
-        message: "Availability rule not found.",
+        message: "Time slot doesnot exist.",
         status: 404,
         success: false,
       });
     }
 
-    await prisma.availabilityRule.delete({
+    await prisma.booking.delete({
       where: { id },
     });
 
     return NextResponse.json({
-      message: "AvailabilityRule deleted successfully.",
+      message: "Booking deleted successfully.",
       status: 204,
       success: true,
     });

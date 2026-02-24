@@ -15,4 +15,15 @@ export const userSchema = z
     path: ["confirmPassword"],
   });
 
+export const userTypeSchema = z.object({
+  id: z.string(),
+  name: z.string().min(4, "Name is too short."),
+  username: z.string().min(4, "Username is too short."),
+  email: z.string().email("Invalid Email"),
+  phoneNumber: z.string().min(10, "Insert a valid phonenumber.").optional(),
+  country: z.string(),
+  role: z.enum(["PROVIDER", "CLIENT", "ADMIN"]),
+  bio: z.string().optional(),
+  timezone: z.string().optional(),
+});
 export type userInput = z.infer<typeof userSchema>;

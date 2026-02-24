@@ -1,4 +1,4 @@
-import { createAvailabilityRuleSchema } from "@/app/types/availability-rule";
+import { createAvailabilityRuleSchema } from "@/lib/validators/availability-rule";
 import { requireAdminProvider } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
